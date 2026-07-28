@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NO_TEXTURE_CORRECTED</title>
+  <title>NO_TEXTURE_NETHER_3D</title>
   <style>
     * {
       margin: 0;
@@ -20,16 +20,16 @@
       font-family: 'Courier New', monospace;
     }
 
-    #gl-canvas {
+    #webgl-container {
       width: 100vw;
       height: 100vh;
-      display: block;
       position: absolute;
       top: 0;
       left: 0;
       z-index: 1;
     }
 
+    /* Overlay Vignette et Lentille */
     .hud-overlay {
       position: absolute;
       top: 0;
@@ -38,11 +38,14 @@
       height: 100vh;
       z-index: 2;
       pointer-events: none;
-      background: radial-gradient(circle at center, transparent 30%, rgba(5, 0, 5, 0.9) 90%);
+      background: radial-gradient(circle at center, transparent 25%, rgba(15, 0, 8, 0.9) 85%),
+                  linear-gradient(rgba(255, 0, 255, 0.03) 50%, rgba(0, 0, 0, 0.3) 50%);
+      background-size: 100% 100%, 100% 4px;
       box-shadow: inset 0 0 100px #000;
     }
 
-    .center-ui {
+    /* Interface Bouton Central */
+    .ui-container {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -50,7 +53,7 @@
       z-index: 10;
     }
 
-    .btn-no-texture {
+    .btn-reset {
       position: relative;
       padding: 24px 64px;
       font-size: 2.2rem;
@@ -63,44 +66,47 @@
       cursor: pointer;
       background: conic-gradient(#ff00ff 90deg, #000000 90deg 180deg, #ff00ff 180deg 270deg, #000000 270deg);
       background-size: 32px 32px;
-      text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 0 15px #ff00ff;
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 15px #ff00ff;
       box-shadow: 0 0 40px rgba(255, 0, 255, 0.9), inset 0 0 15px rgba(0, 0, 0, 0.9);
-      transition: transform 0.15s ease-out, box-shadow 0.15s;
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s;
     }
 
-    .btn-no-texture:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 70px rgba(255, 0, 255, 1), 0 0 20px #ffffff;
+    .btn-reset:hover {
+      transform: scale(1.12);
+      box-shadow: 0 0 70px rgba(255, 0, 255, 1), 0 0 25px #ffffff;
       background-size: 16px 16px;
     }
 
-    .btn-no-texture:active {
+    .btn-reset:active {
       transform: scale(0.92);
       filter: invert(1);
     }
 
-    /* Effets de Glitch au clic */
-    body.corrupted #gl-canvas {
+    /* Effets de Glitch Extrêmes au Clic */
+    body.corrupted #webgl-container {
       animation: gpuCrash 0.03s infinite;
-      filter: invert(1) contrast(400%) saturate(600%);
+      filter: invert(1) contrast(500%) saturate(800%);
     }
 
-    body.corrupted .btn-no-texture {
-      animation: btnDestruct 0.03s infinite;
+    body.corrupted .btn-reset {
+      animation: btnCorrupt 0.02s infinite;
     }
 
     @keyframes gpuCrash {
-      0% { transform: translate(15px, -10px) skewX(20deg); }
-      50% { transform: translate(-20px, 15px) scaleY(1.2); }
+      0% { transform: translate(18px, -12px) skewX(20deg); }
+      25% { transform: translate(-20px, 15px) scaleY(1.2); }
+      50% { transform: translate(12px, -18px) skewX(-25deg); }
+      75% { transform: translate(-15px, 20px) scaleX(1.3); }
       100% { transform: translate(0, 0); }
     }
 
-    @keyframes btnDestruct {
-      0% { transform: scale(1.4) rotate(10deg); color: #00ffff; }
-      50% { transform: scale(0.6) rotate(-10deg); color: #ff0000; }
-      100% { transform: scale(1.1) rotate(5deg); color: #00ff00; }
+    @keyframes btnCorrupt {
+      0% { transform: scale(1.4) rotate(12deg); color: #00ffff; background-size: 2px 80px; }
+      50% { transform: scale(0.6) rotate(-12deg); color: #ff0000; background-size: 80px 2px; }
+      100% { transform: scale(1.1) rotate(6deg); color: #00ff00; background-size: 10px 10px; }
     }
 
+    /* Écran d'extinction CRT */
     .crt-screen-off {
       position: fixed;
       top: 0; left: 0;
@@ -138,238 +144,218 @@
 </head>
 <body>
 
-  <canvas id="gl-canvas"></canvas>
+  <div id="webgl-container"></div>
   <div class="hud-overlay"></div>
 
-  <div class="center-ui">
-    <button class="btn-no-texture" id="resetBtn">RESET</button>
+  <div class="ui-container">
+    <button class="btn-reset" id="resetBtn">RESET</button>
   </div>
 
   <div class="crt-screen-off" id="crt"></div>
 
   <div class="fatal-error-screen" id="terminal">
     [GPU_DRIVER_FATAL_COLLAPSE]<br>
-    RAYMARCHER_PIXEL_SHADER_OVERFLOW<br>
-    STATUS: KERNEL_PANIC (0x000000FF)<br><br>
-    NO_TEXTURE_BUFFER_DESTROYED.<br>
+    TEXTURE_MEMORY_OVERFLOW_AT_0x000000FF<br>
+    STATUS: KERNEL_PANIC_RENDERER_DESTROYED<br><br>
+    NO_TEXTURE_BUFFER_UNRECOVERABLE.<br>
     CLOSING HOST PROCESS...
   </div>
 
+  <!-- Charger Three.js depuis CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
     // --------------------------------------------------
-    // SHADERS GLSL (CORRIGÉS ET OPTIMISÉS)
+    // 1. INITIALISATION MOTEUR 3D
     // --------------------------------------------------
-    const vertexShaderSource = `
-      attribute vec2 position;
-      void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-      }
-    `;
+    const container = document.getElementById('webgl-container');
 
-    const fragmentShaderSource = `
-      precision mediump float;
-      uniform vec2 u_resolution;
-      uniform float u_time;
-      uniform float u_glitch;
+    const scene = new THREE.Scene();
+    // Brouillard rouge/pourpre Nether
+    scene.fog = new THREE.FogExp2(0x1a0008, 0.018);
 
-      // Generateur Bruit 3D
-      float hash(vec3 p) {
-        p = fract(p * vec3(443.897, 441.423, 437.195));
-        p += dot(p, p.yzx + 19.19);
-        return fract((p.x + p.y) * p.z);
-      }
+    const camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 16, 32);
 
-      float noise3D(vec3 p) {
-        vec3 i = floor(p);
-        vec3 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-
-        return mix(
-          mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
-              mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
-          mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
-              mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
-      }
-
-      // Caverne Nether Voxel
-      float map(vec3 p) {
-        vec3 q = floor(p * 0.7) / 0.7; // Marches Voxel
-        float n = noise3D(q * 0.15) * 16.0;
-        float floorDetail = sin(q.x * 0.4) * cos(q.z * 0.4) * 2.5;
-        return min(p.y + 10.0 + n + floorDetail, 32.0 - p.y + n);
-      }
-
-      vec3 calcNormal(vec3 p) {
-        vec2 e = vec2(0.01, 0.0);
-        return normalize(vec3(
-          map(p + e.xyy) - map(p - e.xyy),
-          map(p + e.yxy) - map(p - e.yxy),
-          map(p + e.yyx) - map(p - e.yyx)
-        ));
-      }
-
-      // Pattern Damier Magenta/Noir
-      vec3 getNoTexturePattern(vec3 p, vec3 n) {
-        vec3 coord = p * 0.35;
-        vec3 blend = abs(n);
-        blend /= (blend.x + blend.y + blend.z);
-
-        vec3 check = floor(coord);
-        float patternX = mod(check.y + check.z, 2.0);
-        float patternY = mod(check.x + check.z, 2.0);
-        float patternZ = mod(check.x + check.y, 2.0);
-
-        float finalPattern = patternX * blend.x + patternY * blend.y + patternZ * blend.z;
-        return mix(vec3(1.0, 0.0, 1.0), vec3(0.0, 0.0, 0.0), step(0.5, finalPattern));
-      }
-
-      void main() {
-        vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
-
-        if (u_glitch > 0.5) {
-          uv.x += sin(uv.y * 80.0 + u_time * 40.0) * 0.08;
-          uv.y += cos(uv.x * 80.0 + u_time * 40.0) * 0.08;
-        }
-
-        float t = u_time * 0.4;
-        vec3 ro = vec3(sin(t) * 8.0, 2.0 + cos(t * 1.2) * 2.5, u_time * 6.0);
-        vec3 ta = ro + vec3(sin(t * 0.8) * 0.4, cos(t * 0.5) * 0.2, 1.0);
-
-        vec3 ww = normalize(ta - ro);
-        vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
-        vec3 vv = normalize(cross(uu, ww));
-        vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.2 * ww);
-
-        float d = 0.0;
-        float maxD = 80.0;
-        vec3 p;
-
-        for (int i = 0; i < 70; i++) {
-          p = ro + rd * d;
-          float h = map(p);
-          if (abs(h) < 0.005 || d > maxD) break;
-          d += h * 0.65;
-        }
-
-        vec3 col = vec3(0.0);
-
-        if (d < maxD) {
-          vec3 n = calcNormal(p);
-          vec3 texCol = getNoTexturePattern(p, n);
-
-          vec3 lightPos = ro + vec3(0.0, 4.0, 8.0);
-          vec3 lightDir = normalize(lightPos - p);
-          float diff = max(dot(n, lightDir), 0.15);
-
-          col = texCol * diff;
-          col *= exp(-0.025 * d);
-        }
-
-        // Brouillard rouge/violet arrière-plan
-        float fog = 1.0 - exp(-d * 0.03);
-        vec3 fogColor = vec3(0.6, 0.0, 0.2);
-        col = mix(col, fogColor, fog);
-
-        // Halo rouge profond
-        float deepRedGlow = pow(max(dot(rd, vec3(0.0, 0.0, 1.0)), 0.0), 3.0);
-        col += vec3(1.0, 0.0, 0.15) * deepRedGlow * 1.5;
-
-        if (u_glitch > 0.5) {
-          col.r += 0.4;
-          col.g *= 0.2;
-        }
-
-        gl_FragColor = vec4(col, 1.0);
-      }
-    `;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
 
     // --------------------------------------------------
-    // INITIALISATION WEBGL SÉCURISÉE
+    // 2. GENERATEUR DE TEXTURE DAMIER NO-TEXTURE
     // --------------------------------------------------
-    const canvas = document.getElementById('gl-canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    function createNoTextureMap() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
 
-    if (!gl) {
-      console.error("WebGL non supporté.");
+      const size = 256;
+      ctx.fillStyle = '#FF00FF'; // Magenta
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillRect(size, size, size, size);
+
+      ctx.fillStyle = '#000000'; // Noir
+      ctx.fillRect(size, 0, size, size);
+      ctx.fillRect(0, size, size, size);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.magFilter = THREE.NearestFilter; // Rendu pixelisé net style Minecraft/Source Engine
+      texture.minFilter = THREE.NearestFilter;
+      return texture;
     }
 
-    function createShader(gl, type, source) {
-      const shader = gl.createShader(type);
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error("Erreur Shader:", gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
+    const noTexture = createNoTextureMap();
+    noTexture.repeat.set(50, 50);
+
+    const noTextureMaterial = new THREE.MeshStandardMaterial({
+      map: noTexture,
+      roughness: 0.7,
+      metalness: 0.15
+    });
+    // --------------------------------------------------
+    // 3. TERRAIN 3D VOXEL / CANYON
+    // --------------------------------------------------
+    const geoWidth = 180;
+    const geoHeight = 180;
+    const terrainGeo = new THREE.PlaneGeometry(geoWidth, geoHeight, 100, 100);
+    const pos = terrainGeo.attributes.position;
+
+    // Relief en marches d'escaliers (Voxel)
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const y = pos.getY(i);
+
+      let z = Math.sin(x * 0.06) * Math.cos(y * 0.06) * 14 + Math.cos(x * 0.03) * 12;
+      z = Math.floor(z / 3) * 3; // Effet Voxel
+
+      // Creuser un canyon central
+      const distFromCenter = Math.abs(x);
+      if (distFromCenter < 25) {
+        z -= (25 - distFromCenter) * 0.6;
       }
-      return shader;
+
+      pos.setZ(i, z);
     }
+    terrainGeo.computeVertexNormals();
 
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    // Sol
+    const terrain = new THREE.Mesh(terrainGeo, noTextureMaterial);
+    terrain.rotation.x = -Math.PI / 2;
+    scene.add(terrain);
 
-    const program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    gl.useProgram(program);
+    // Plafond (Caverne)
+    const ceiling = new THREE.Mesh(terrainGeo, noTextureMaterial);
+    ceiling.rotation.x = Math.PI / 2;
+    ceiling.position.y = 38;
+    scene.add(ceiling);
 
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      -1, -1,  1, -1, -1,  1,
-      -1,  1,  1, -1,  1,  1,
-    ]), gl.STATIC_DRAW);
+    // Piliers de stalagmites
+    const pillarGeo = new THREE.BoxGeometry(8, 60, 8);
+    const pillarCoords = [[-30, 10, -20], [35, 10, -35], [-15, 10, -60], [25, 10, 10]];
 
-    const positionLocation = gl.getAttribLocation(program, "position");
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-    const uResolution = gl.getUniformLocation(program, "u_resolution");
-    const uTime = gl.getUniformLocation(program, "u_time");
-    const uGlitch = gl.getUniformLocation(program, "u_glitch");
-
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-    }
-    window.addEventListener('resize', resize);
-    resize();
+    pillarCoords.forEach(p => {
+      const pillar = new THREE.Mesh(pillarGeo, noTextureMaterial);
+      pillar.position.set(p[0], p[1], p[2]);
+      scene.add(pillar);
+    });
 
     // --------------------------------------------------
-    // BOUCLE DE RENDU & SONS DE CRASH
+    // 4. ÉCLAIRAGE DYNAMIQUE
     // --------------------------------------------------
-    let startTime = performance.now();
+    const ambientLight = new THREE.AmbientLight(0xff00ff, 0.3);
+    scene.add(ambientLight);
+
+    // Lumière rouge vif au fond de la map
+    const deepRedLight = new THREE.PointLight(0xff0033, 6, 140);
+    deepRedLight.position.set(0, 5, -70);
+    scene.add(deepRedLight);
+
+    // Lumière violette sur le joueur
+    const playerLight = new THREE.PointLight(0xff00ff, 3, 60);
+    playerLight.position.set(0, 18, 25);
+    scene.add(playerLight);
+    // --------------------------------------------------
+    // 5. BOUCLE DE RENDU & CONTRÔLES
+    // --------------------------------------------------
+    let time = 0;
     let isCorrupted = false;
 
-    function render() {
-      const currentTime = (performance.now() - startTime) * 0.001;
+    function animate() {
+      requestAnimationFrame(animate);
 
-      gl.uniform2f(uResolution, canvas.width, canvas.height);
-      gl.uniform1f(uTime, currentTime);
-      gl.uniform1f(uGlitch, isCorrupted ? 1.0 : 0.0);
+      time += 0.005;
 
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      requestAnimationFrame(render);
+      if (!isCorrupted) {
+        // Vol de caméra fluide style FPS Spectateur
+        camera.position.x = Math.sin(time) * 10;
+        camera.position.y = 16 + Math.cos(time * 1.4) * 2.5;
+        camera.position.z = 32 + Math.sin(time * 0.3) * 4;
+        camera.lookAt(0, -2, -25);
+
+        // Défilement continu du damier
+        noTexture.offset.y -= 0.002;
+      } else {
+        // Caméra folle pendant la corruption
+        camera.position.x += (Math.random() - 0.5) * 8;
+        camera.position.y += (Math.random() - 0.5) * 8;
+        camera.rotation.z += (Math.random() - 0.5) * 0.4;
+        noTexture.offset.x += Math.random() * 0.3;
+        noTexture.offset.y += Math.random() * 0.3;
+      }
+
+      renderer.render(scene, camera);
     }
-    render();
 
-    function playGlitchAudio() {
+    animate();
+
+    // Redimensionnement de fenêtre
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    // --------------------------------------------------
+    // 6. SYNTHÉTISEUR AUDIO & CRASH SYSTEME
+    // --------------------------------------------------
+    function playUltraGlitchSound() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Oscillateur de fréquence montante
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(80, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 1.2);
+        osc.frequency.setValueAtTime(70, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(4000, audioCtx.currentTime + 1.8);
         gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+
+        // Bruit blanc saturé
+        const bufferSize = audioCtx.sampleRate * 2;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+
         osc.connect(gain);
         gain.connect(audioCtx.destination);
+        noise.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+
         osc.start();
+        noise.start();
       } catch(e) {}
     }
 
+    // Gestionnaire de Clic sur le bouton RESET
     const btn = document.getElementById('resetBtn');
     const crt = document.getElementById('crt');
     const terminal = document.getElementById('terminal');
@@ -379,16 +365,18 @@
       document.body.classList.add('corrupted');
       btn.innerText = "FATAL_ERR";
 
-      playGlitchAudio();
+      playUltraGlitchSound();
 
+      // Extinction CRT après 1.6s
       setTimeout(() => {
         crt.classList.add('active');
-      }, 1500);
+      }, 1600);
 
+      // Crash terminal final et fermeture après 2s
       setTimeout(() => {
         terminal.style.display = 'block';
-        window.close();
-      }, 1900);
+        window.close(); // Tentative de fermer l'onglet
+      }, 2000);
     });
   </script>
 </body>
