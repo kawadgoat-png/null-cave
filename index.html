@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NO_TEXTURE_RAYMARCHER_AAA</title>
+  <title>NO_TEXTURE_CORRECTED</title>
   <style>
     * {
       margin: 0;
@@ -30,7 +30,6 @@
       z-index: 1;
     }
 
-    /* Post-Processing Lens Distortion UI */
     .hud-overlay {
       position: absolute;
       top: 0;
@@ -39,11 +38,10 @@
       height: 100vh;
       z-index: 2;
       pointer-events: none;
-      background: radial-gradient(circle at center, transparent 30%, rgba(5, 0, 5, 0.95) 90%);
-      box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.95);
+      background: radial-gradient(circle at center, transparent 30%, rgba(5, 0, 5, 0.9) 90%);
+      box-shadow: inset 0 0 100px #000;
     }
 
-    /* UI Central Ultra-Stylisée */
     .center-ui {
       position: absolute;
       top: 50%;
@@ -52,65 +50,57 @@
       z-index: 10;
     }
 
-    .btn-no-texture-aaa {
+    .btn-no-texture {
       position: relative;
-      padding: 28px 72px;
-      font-size: 2.5rem;
+      padding: 24px 64px;
+      font-size: 2.2rem;
       font-weight: 900;
-      letter-spacing: 10px;
+      letter-spacing: 8px;
       color: #ffffff;
       text-transform: uppercase;
-      border: 5px solid #000000;
+      border: 4px solid #000000;
       outline: none;
       cursor: pointer;
       background: conic-gradient(#ff00ff 90deg, #000000 90deg 180deg, #ff00ff 180deg 270deg, #000000 270deg);
-      background-size: 36px 36px;
-      text-shadow: 
-        -3px -3px 0 #000, 3px -3px 0 #000, 
-        -3px 3px 0 #000, 3px 3px 0 #000,
-        0 0 15px #ff00ff;
-      box-shadow: 
-        0 0 50px rgba(255, 0, 255, 1), 
-        inset 0 0 20px rgba(0, 0, 0, 0.9);
-      transition: all 0.1s ease-out;
+      background-size: 32px 32px;
+      text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 0 15px #ff00ff;
+      box-shadow: 0 0 40px rgba(255, 0, 255, 0.9), inset 0 0 15px rgba(0, 0, 0, 0.9);
+      transition: transform 0.15s ease-out, box-shadow 0.15s;
     }
 
-    .btn-no-texture-aaa:hover {
-      transform: scale(1.15) rotate(-1deg);
-      box-shadow: 0 0 80px rgba(255, 0, 255, 1), 0 0 30px rgba(255, 255, 255, 0.9);
-      background-size: 18px 18px;
+    .btn-no-texture:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 70px rgba(255, 0, 255, 1), 0 0 20px #ffffff;
+      background-size: 16px 16px;
     }
 
-    .btn-no-texture-aaa:active {
-      transform: scale(0.9);
+    .btn-no-texture:active {
+      transform: scale(0.92);
       filter: invert(1);
     }
 
-    /* Glitch System State */
+    /* Effets de Glitch au clic */
     body.corrupted #gl-canvas {
-      animation: gpuCrash 0.02s infinite;
-      filter: invert(1) contrast(500%) saturate(800%);
+      animation: gpuCrash 0.03s infinite;
+      filter: invert(1) contrast(400%) saturate(600%);
     }
 
-    body.corrupted .btn-no-texture-aaa {
-      animation: btnDestruct 0.02s infinite;
+    body.corrupted .btn-no-texture {
+      animation: btnDestruct 0.03s infinite;
     }
 
     @keyframes gpuCrash {
-      0% { transform: translate(20px, -15px) skewX(25deg); }
-      25% { transform: translate(-25px, 20px) scaleY(1.3); }
-      50% { transform: translate(15px, -20px) skewX(-30deg); }
-      75% { transform: translate(-20px, 25px) scaleX(1.4); }
+      0% { transform: translate(15px, -10px) skewX(20deg); }
+      50% { transform: translate(-20px, 15px) scaleY(1.2); }
       100% { transform: translate(0, 0); }
     }
 
     @keyframes btnDestruct {
-      0% { transform: scale(1.5) rotate(12deg); color: #00ffff; background-size: 2px 100px; }
-      50% { transform: scale(0.5) rotate(-15deg); color: #ff0000; background-size: 100px 2px; }
-      100% { transform: scale(1.2) rotate(8deg); color: #00ff00; background-size: 8px 8px; }
+      0% { transform: scale(1.4) rotate(10deg); color: #00ffff; }
+      50% { transform: scale(0.6) rotate(-10deg); color: #ff0000; }
+      100% { transform: scale(1.1) rotate(5deg); color: #00ff00; }
     }
 
-    /* CRT Crash Final */
     .crt-screen-off {
       position: fixed;
       top: 0; left: 0;
@@ -128,7 +118,7 @@
 
     @keyframes collapseCRT {
       0% { transform: scale(1, 1); filter: brightness(30); }
-      50% { transform: scale(1, 0.001); background: #ff00ff; }
+      50% { transform: scale(1, 0.002); background: #ff00ff; }
       100% { transform: scale(0, 0); background: #000; }
     }
 
@@ -140,7 +130,6 @@
       z-index: 200;
       display: none;
       color: #ff00ff;
-      font-family: 'Courier New', monospace;
       padding: 40px;
       font-size: 1.1rem;
       line-height: 1.6;
@@ -153,7 +142,7 @@
   <div class="hud-overlay"></div>
 
   <div class="center-ui">
-    <button class="btn-no-texture-aaa" id="resetBtn">RESET</button>
+    <button class="btn-no-texture" id="resetBtn">RESET</button>
   </div>
 
   <div class="crt-screen-off" id="crt"></div>
@@ -168,15 +157,22 @@
 
   <script>
     // --------------------------------------------------
-    // SHADER CODE (GLSL) - RAYMARCHING AAA ENGINE
+    // SHADERS GLSL (CORRIGÉS ET OPTIMISÉS)
     // --------------------------------------------------
+    const vertexShaderSource = `
+      attribute vec2 position;
+      void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
     const fragmentShaderSource = `
-      precision highp float;
+      precision mediump float;
       uniform vec2 u_resolution;
       uniform float u_time;
       uniform float u_glitch;
 
-      // Generateur de bruit 3D
+      // Generateur Bruit 3D
       float hash(vec3 p) {
         p = fract(p * vec3(443.897, 441.423, 437.195));
         p += dot(p, p.yzx + 19.19);
@@ -195,16 +191,14 @@
               mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
       }
 
-      // Distance Function Terrain Voxelised (Nether Cavern)
+      // Caverne Nether Voxel
       float map(vec3 p) {
-        vec3 q = floor(p * 0.8) / 0.8; // Step effect Voxel
-        float n = noise3D(q * 0.15) * 18.0;
-        float cave = -length(p.xy * vec2(0.5, 0.8)) + 16.0;
-        float floorDetail = sin(q.x * 0.5) * cos(q.z * 0.5) * 2.0;
-        return min(p.y + 12.0 + n + floorDetail, 35.0 - p.y + n);
+        vec3 q = floor(p * 0.7) / 0.7; // Marches Voxel
+        float n = noise3D(q * 0.15) * 16.0;
+        float floorDetail = sin(q.x * 0.4) * cos(q.z * 0.4) * 2.5;
+        return min(p.y + 10.0 + n + floorDetail, 32.0 - p.y + n);
       }
 
-      // Calcul des normales pour le relief
       vec3 calcNormal(vec3 p) {
         vec2 e = vec2(0.01, 0.0);
         return normalize(vec3(
@@ -214,59 +208,47 @@
         ));
       }
 
-      // Texture Missing Texture Magenta/Noir Triplanare
+      // Pattern Damier Magenta/Noir
       vec3 getNoTexturePattern(vec3 p, vec3 n) {
-        vec3 coord = p * 0.4;
+        vec3 coord = p * 0.35;
         vec3 blend = abs(n);
         blend /= (blend.x + blend.y + blend.z);
 
-        // Damier
         vec3 check = floor(coord);
         float patternX = mod(check.y + check.z, 2.0);
         float patternY = mod(check.x + check.z, 2.0);
         float patternZ = mod(check.x + check.y, 2.0);
 
         float finalPattern = patternX * blend.x + patternY * blend.y + patternZ * blend.z;
-        
-        vec3 magenta = vec3(1.0, 0.0, 1.0);
-        vec3 black = vec3(0.0, 0.0, 0.0);
-
-        return mix(magenta, black, step(0.5, finalPattern));
+        return mix(vec3(1.0, 0.0, 1.0), vec3(0.0, 0.0, 0.0), step(0.5, finalPattern));
       }
-      void main() {
-        // Normalisation des coordonnées de l'écran avec Fisheye (Lentille)
-        vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
-        
-        // Distortion de lentille légère
-        float r2 = dot(uv, uv);
-        uv *= (1.0 + 0.15 * r2);
 
-        // Effet Glitch violent sur les UV si activé
+      void main() {
+        vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+
         if (u_glitch > 0.5) {
-          uv.x += sin(uv.y * 100.0 + u_time * 50.0) * 0.1;
-          uv.y += cos(uv.x * 100.0 + u_time * 50.0) * 0.1;
+          uv.x += sin(uv.y * 80.0 + u_time * 40.0) * 0.08;
+          uv.y += cos(uv.x * 80.0 + u_time * 40.0) * 0.08;
         }
 
-        // Caméra Raymarching FPS
         float t = u_time * 0.4;
-        vec3 ro = vec3(sin(t) * 10.0, 2.0 + cos(t * 1.5) * 3.0, u_time * 8.0); // Avancement dans la caverne
-        vec3 ta = ro + vec3(sin(t * 0.8) * 0.5, cos(t * 0.5) * 0.3, 1.0);
-        
+        vec3 ro = vec3(sin(t) * 8.0, 2.0 + cos(t * 1.2) * 2.5, u_time * 6.0);
+        vec3 ta = ro + vec3(sin(t * 0.8) * 0.4, cos(t * 0.5) * 0.2, 1.0);
+
         vec3 ww = normalize(ta - ro);
         vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
         vec3 vv = normalize(cross(uu, ww));
         vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.2 * ww);
 
-        // Raymarching Loop
         float d = 0.0;
-        float maxD = 100.0;
+        float maxD = 80.0;
         vec3 p;
-        
-        for (int i = 0; i < 96; i++) {
+
+        for (int i = 0; i < 70; i++) {
           p = ro + rd * d;
           float h = map(p);
-          if (abs(h) < 0.002 || d > maxD) break;
-          d += h * 0.6; // Step précis pour Voxel
+          if (abs(h) < 0.005 || d > maxD) break;
+          d += h * 0.65;
         }
 
         vec3 col = vec3(0.0);
@@ -275,51 +257,40 @@
           vec3 n = calcNormal(p);
           vec3 texCol = getNoTexturePattern(p, n);
 
-          // Lumières
-          vec3 lightPos = ro + vec3(0.0, 5.0, 10.0); // Lumière joueur (Violette)
+          vec3 lightPos = ro + vec3(0.0, 4.0, 8.0);
           vec3 lightDir = normalize(lightPos - p);
-          float diff = max(dot(n, lightDir), 0.1);
+          float diff = max(dot(n, lightDir), 0.15);
 
           col = texCol * diff;
-
-          // Ombrage de profondeur
-          col *= exp(-0.02 * d);
+          col *= exp(-0.025 * d);
         }
 
-        // Brouillard Volumétrique Rouge / Pourpre
-        float fog = 1.0 - exp(-d * 0.025);
-        vec3 fogColor = mix(vec3(0.8, 0.0, 0.2), vec3(0.2, 0.0, 0.2), sin(u_time) * 0.5 + 0.5);
+        // Brouillard rouge/violet arrière-plan
+        float fog = 1.0 - exp(-d * 0.03);
+        vec3 fogColor = vec3(0.6, 0.0, 0.2);
         col = mix(col, fogColor, fog);
 
-        // Éclairage de fond intense (Arrière-plan rouge comme l'image)
-        float deepRedGlow = pow(max(dot(rd, vec3(0.0, 0.0, 1.0)), 0.0), 4.0);
-        col += vec3(1.0, 0.0, 0.2) * deepRedGlow * 1.8;
+        // Halo rouge profond
+        float deepRedGlow = pow(max(dot(rd, vec3(0.0, 0.0, 1.0)), 0.0), 3.0);
+        col += vec3(1.0, 0.0, 0.15) * deepRedGlow * 1.5;
 
-        // Post-process Aberration Chromatique
         if (u_glitch > 0.5) {
-          col.r = texture2D(gl_FragColor, uv + vec2(0.05, 0.0)).r;
-          col.b = texture2D(gl_FragColor, uv - vec2(0.05, 0.0)).b;
+          col.r += 0.4;
+          col.g *= 0.2;
         }
 
         gl_FragColor = vec4(col, 1.0);
       }
     `;
 
-    const vertexShaderSource = `
-      attribute vec2 position;
-      void main() {
-        gl_Position = vec4(position, 1.0);
-      }
-    `;
-
     // --------------------------------------------------
-    // CONTEXTE WEBGL & SHADERS COMPILATION
+    // INITIALISATION WEBGL SÉCURISÉE
     // --------------------------------------------------
     const canvas = document.getElementById('gl-canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
     if (!gl) {
-      alert("WebGL non supporté sur votre navigateur !");
+      console.error("WebGL non supporté.");
     }
 
     function createShader(gl, type, source) {
@@ -327,7 +298,7 @@
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(shader));
+        console.error("Erreur Shader:", gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
       }
@@ -343,7 +314,6 @@
     gl.linkProgram(program);
     gl.useProgram(program);
 
-    // Quad pleine écran pour faire tourner le Raymarcher
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -355,7 +325,6 @@
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // Uniforms
     const uResolution = gl.getUniformLocation(program, "u_resolution");
     const uTime = gl.getUniformLocation(program, "u_time");
     const uGlitch = gl.getUniformLocation(program, "u_glitch");
@@ -369,7 +338,7 @@
     resize();
 
     // --------------------------------------------------
-    // RENDER LOOP & AUDIO GLITCH
+    // BOUCLE DE RENDU & SONS DE CRASH
     // --------------------------------------------------
     let startTime = performance.now();
     let isCorrupted = false;
@@ -386,43 +355,21 @@
     }
     render();
 
-    // Moteur Audio Synthétique de Crash System (WebAudio API)
-    function playUltraCrashSound() {
+    function playGlitchAudio() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Oscillation saturée basse
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(60, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 1.5);
-
-        // Bruit de distorsion
-        const bufferSize = audioCtx.sampleRate * 2;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.sin(i * 0.01);
-        }
-
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = buffer;
-
-        const noiseGain = audioCtx.createGain();
-        noiseGain.gain.setValueAtTime(1.0, audioCtx.currentTime);
-
+        osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 1.2);
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        noise.connect(noiseGain);
-        noiseGain.connect(audioCtx.destination);
-
         osc.start();
-        noise.start();
       } catch(e) {}
     }
 
-    // Event Reset Click
     const btn = document.getElementById('resetBtn');
     const crt = document.getElementById('crt');
     const terminal = document.getElementById('terminal');
@@ -432,17 +379,16 @@
       document.body.classList.add('corrupted');
       btn.innerText = "FATAL_ERR";
 
-      playUltraCrashSound();
+      playGlitchAudio();
 
-      // Crash progressif de la carte vidéo et de l'écran
       setTimeout(() => {
         crt.classList.add('active');
-      }, 1600);
+      }, 1500);
 
       setTimeout(() => {
         terminal.style.display = 'block';
-        window.close(); // Tentative de fermer l'onglet
-      }, 2000);
+        window.close();
+      }, 1900);
     });
   </script>
 </body>
